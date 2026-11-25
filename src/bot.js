@@ -5,6 +5,7 @@ import { TELEGRAM_OWNER_ID } from './config.js';
 import { parseCommand, toEaLines, describe, orderKeyboard } from './bridge/command.js';
 import { broadcast, listClients } from './bridge/tcp.js';
 import { getLiquidityLevels, formatLiqMessage } from './liquidity.js';
+import { getTpR, setTpR } from './settings.js';
 
 const handler = (build) => async (ctx) => {
   try {
@@ -48,6 +49,20 @@ bot.command('ea', async (ctx) => {
   });
 });
 
+// /tpr: xem TP_R; /tpr 2.5: đổi TP_R (chỉ chủ bot)
+bot.command('tpr', async (ctx) => {
+  if (!TELEGRAM_OWNER_ID || ctx.from?.id !== TELEGRAM_OWNER_ID) return;
+  const arg = String(ctx.match ?? '').trim().replace(',', '.');
+  try {
+    if (!arg) return void (await ctx.reply(`🎯 TP_R hiện tại: <code>${getTpR()}</code>\nĐổi: <code>/tpr 2.5</code>`, { parse_mode: 'HTML' }));
+    const old = getTpR();
+    const v = setTpR(Number(arg));
+    await ctx.reply(`✅ Đã đổi TP_R: ${old} ➜ <b>${v}</b>`, { parse_mode: 'HTML' });
+  } catch (err) {
+    await ctx.reply(`⚠️ ${esc(err.message)}`, { parse_mode: 'HTML' }).catch(() => {});
+  }
+});
+
 // Đăng ký sau các command để /today, /week, /ea không bị nuốt
 bot.on('message:text', async (ctx) => {
   if (!isOwner(ctx)) return;
@@ -86,6 +101,7 @@ export function startBot() {
       { command: 'today', description: 'Tin USD high impact hôm nay' },
       { command: 'week', description: 'Tin USD high impact cả tuần' },
       { command: 'liq', description: 'High/Low hôm qua, phiên NY, tuần trước' },
+      { command: 'tpr', description: 'Xem/đổi TP_R trên nút copy' },
       { command: 'ea', description: 'EA MT5 đang kết nối' },
     ])
     .catch((err) => console.error('setMyCommands lỗi:', err.message));

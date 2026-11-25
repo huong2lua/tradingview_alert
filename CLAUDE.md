@@ -44,6 +44,8 @@ All tunables (symbol, timeframe, ATR/MACD lengths, history, calendar hours/inter
 
 **Telegram** (`outputs/telegram.js`): one shared grammY `bot` instance with the auto-retry plugin. Sending and command handling both use it. `sendTelegram` always uses HTML parse mode and swallows errors, so a Telegram failure never kills the TradingView session. HTML-escape any dynamic text (see `esc` in `calendar/format.js`).
 
+**Runtime settings** (`src/settings.js`): `TP_R` in config is only the default. The owner changes it with `/tpr <value>` (0.5–10); it is persisted to `data/settings.json` and read via `getTpR()`. `/tpr` alone shows the current value.
+
 **Calendar** (`src/calendar/`)
 - `api.js`: fetches the FF this-week feed, keeps only `country === 'USD' && impact === 'High'`, and normalises times to UTC ISO strings.
 - `store.js`: `getFFEvents()` is the only entry point. It caches to `data/ff-cache.json` (gitignored) with a persisted `nextFetchAt`. Refresh is at most once every 65 min, there is a 6-min cooldown after every attempt (written *before* the request so restarts can't spam), and a 20-min backoff or `Retry-After` on HTTP 429. It falls back to stale cache on error and dedupes concurrent calls via `inflight`. FF rate-limits aggressively, so don't bypass this cache.
@@ -52,7 +54,7 @@ All tunables (symbol, timeframe, ATR/MACD lengths, history, calendar hours/inter
 - `queries.js` / `src/bot.js`: the `/today` and `/week` command handlers.
 
 **Bridge MT5** (`src/bridge/`, `mt5/ea.mq5`)
-- **Command syntax** (case-insensitive): `BUY|SELL <entry>[-<entry2>] SL <p> TP <p> R<usd>`, `SL <p>`, `TP <p>`, `BE`, `CANCEL`, `CLOSE [BUY|SELL]`. With two entries, R is split equally. The syntax is defined in `command.js` (`parseCommand`). `buildKeyboard` in `outputs/telegram.js` produces copy-button text in this same syntax (TP = `TP_R`, R = `DEFAULT_RISK_USD`), so the two must stay in sync.
+- **Command syntax** (case-insensitive): `BUY|SELL <entry>[-<entry2>] SL <p> TP <p> R<usd>`, `SL <p>`, `TP <p>`, `BE`, `CANCEL`, `CLOSE [BUY|SELL]`. With two entries, R is split equally. The syntax is defined in `command.js` (`parseCommand`). `buildKeyboard` in `outputs/telegram.js` produces copy-button text in this same syntax (TP = `getTpR()` from `src/settings.js`, R = `DEFAULT_RISK_USD`), so the two must stay in sync.
 - **`command.js`**: pure functions. `parseCommand` validates the command: SL and TP must be on the correct side of the entry, and R is required. `toEaLines` turns it into flat JSON lines, one per entry, e.g. `{"id","type":"BUY","entry","sl","tp","risk"}`, `{"type":"SL","price"}`, `{"type":"BE"}`. The EA's JSON parser is naive, so keep payloads flat (no nesting, no arrays).
 - **`tcp.js`**: a line-based TCP server on `BRIDGE_PORT` 3002. It does HELLO+token auth, PING/PONG, and drops EAs after 90 s of silence. `broadcast` sends to every authenticated EA; there are no groups.
 - **`bot.js`**: `message:text` is registered after the commands and only handles private chats from `TELEGRAM_OWNER_ID`. `/ea` lists connected EAs.

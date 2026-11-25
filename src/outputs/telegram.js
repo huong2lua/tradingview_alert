@@ -1,6 +1,7 @@
 import { Bot } from 'grammy';
 import { autoRetry } from '@grammyjs/auto-retry';
-import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TP_R, DEFAULT_RISK_USD } from '../config.js';
+import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DEFAULT_RISK_USD } from '../config.js';
+import { getTpR } from '../settings.js';
 import { getVietnamTimeTags, round } from '../utils.js';
 
 if (!TELEGRAM_BOT_TOKEN) {
@@ -70,8 +71,11 @@ export async function sendTelegram(text, { chatId = TELEGRAM_CHAT_ID, replyMarku
   }
 }
 
-// TP = entry đầu ± TP_R × khoảng cách tới SL
-const tpFrom = (side, entry, sl) => round(side === 'BUY' ? entry + TP_R * (entry - sl) : entry - TP_R * (sl - entry));
+// TP = entry đầu ± TP_R × khoảng cách tới SL (TP_R đổi được bằng /tpr)
+const tpFrom = (side, entry, sl) => {
+  const k = getTpR();
+  return round(side === 'BUY' ? entry + k * (entry - sl) : entry - k * (sl - entry));
+};
 
 // Chuỗi copy đúng cú pháp lệnh bot (xem src/bridge/command.js)
 const orderText = (side, entries, sl) =>
