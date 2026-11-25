@@ -12,7 +12,7 @@ const toDate = (sec) => new Date(sec * 1000); // time của TradingView là Unix
 
 const hl = (list) =>
   list.length
-    ? { high: round(Math.max(...list.map((c) => c.high)), 2), low: round(Math.min(...list.map((c) => c.low)), 2) }
+    ? { high: round(Math.max(...list.map((c) => c.high))), low: round(Math.min(...list.map((c) => c.low))) }
     : null;
 
 // High/Low nến D1 hôm qua, phiên NY (08:00–17:00 giờ NY) nằm trong nến D1 đó, và nến W1 tuần trước
