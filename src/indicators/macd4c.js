@@ -26,14 +26,31 @@ export function calcMacd4C(closedCandles) {
   const macd = macdLine(closedCandles.map((c) => c.close));
   const n = macd.length;
 
-  const state = macdState(macd[n - 1], macd[n - 2]);
-  const prevState = n >= 3 ? macdState(macd[n - 2], macd[n - 3]) : null;
+  const stateAt = (i) => (i >= 1 ? macdState(macd[i], macd[i - 1]) : null);
+  const signalAt = (i) => SIGNAL_BY_STATE[stateAt(i)] ?? null;
+
+  const state = stateAt(n - 1);
+  const prevState = stateAt(n - 2);
+  const signal = state ? SIGNAL_BY_STATE[state] : null;
+  const prevSignal = prevState ? SIGNAL_BY_STATE[prevState] : null;
+
+  // Đếm lùi số nến liên tiếp cùng màu / cùng tín hiệu (tính lại từ dữ liệu nên không mất khi reconnect)
+  const countStreak = (getter, value) => {
+    if (value === null) return 0;
+    let k = 0;
+    for (let i = n - 1; i >= 1 && getter(i) === value; i--) k++;
+    return k;
+  };
 
   return {
       macd: round(macd[n - 1], 4),
       macdState: state,
       macdPrevState: prevState,
       macdChanged: state !== null && state !== prevState, // = colorChanged
-      macdSignal: state ? SIGNAL_BY_STATE[state] : null, // = isBuySignal / isSellSignal
+      macdSignal: signal, // = isBuySignal / isSellSignal
+      macdPrevSignal: prevSignal,
+      signalChanged: signal !== null && signal !== prevSignal,
+      colorStreak: countStreak(stateAt, state),
+      signalStreak: countStreak(signalAt, signal),
   };
 }

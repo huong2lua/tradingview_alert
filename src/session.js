@@ -4,10 +4,15 @@ import {
   TIMEFRAME,
   HISTORY,
   MACD_SLOW,
-  LOG_ONLY_ON_COLOR_CHANGE,
+  SEND_ONLY_ON_CHANGE,
+  CHANGE_MODE,
+  SILENT_WHEN_UNCHANGED,
+  STALE_TIMEOUT_MS,
+  WATCHDOG_TICK_MS,
   credentials,
 } from './config.js';
 import { analyzeClosedCandle } from './analyze.js';
+import { formatMessage0, sendTelegram, buildKeyboard } from './outputs/telegram.js';
 
 // Một phiên kết nối. Resolve khi kết nối đóng/lỗi
 export function runSession() {
@@ -15,10 +20,13 @@ export function runSession() {
     const client = new TradingViewClient({ credentials });
     let currentOpenTime = null; // time của nến đang chạy
     let finished = false;
+    let lastUpdateAt = Date.now();
+    let watchdog = null;
 
     const finish = async () => {
       if (finished) return;
       finished = true;
+      clearInterval(watchdog);
       try {
         await client.close();
       } catch {}
@@ -48,6 +56,7 @@ export function runSession() {
     });
 
     chart.on('update', () => {
+      lastUpdateAt = Date.now();
       const candles = chart.candles; // cũ -> mới, phần tử cuối là nến đang chạy
       if (candles.length < MACD_SLOW + 3) return;
 
@@ -65,11 +74,28 @@ export function runSession() {
 
       const result = analyzeClosedCandle(candles.slice(0, -1));
       if (!result) return;
-      if (LOG_ONLY_ON_COLOR_CHANGE && !result.macdChanged) return;
+      const changed = CHANGE_MODE === 'signal' ? result.signalChanged : result.macdChanged;
+      if (SEND_ONLY_ON_CHANGE && !changed) return;
 
-      console.log(result);
+      // console.log(result); // open only when test
+      const text = formatMessage0(result, { mode: CHANGE_MODE });
+      if (text) {
+        sendTelegram(text, {
+          replyMarkup: buildKeyboard(result),
+          silent: SILENT_WHEN_UNCHANGED && !changed, // chỉ có chuông khi đổi trạng thái
+        });
+      }
     });
 
+    // Socket có thể treo mà không bắn 'close' => tự đóng để vòng lặp ở index.js kết nối lại
+    watchdog = setInterval(() => {
+      const idle = Date.now() - lastUpdateAt;
+      if (idle < STALE_TIMEOUT_MS) return;
+      console.error(`Không có update ${Math.round(idle / 60_000)} phút, kết nối lại...`);
+      finish();
+    }, WATCHDOG_TICK_MS);
+
+    lastUpdateAt = Date.now();
     chart.setMarket(SYMBOL, { timeframe: TIMEFRAME, count: HISTORY });
   });
 }
