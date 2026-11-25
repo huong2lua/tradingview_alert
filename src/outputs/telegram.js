@@ -50,10 +50,10 @@ export function formatMessage0(r, { mode = 'color' } = {}) {
   return [
     `#${timeTag} #${dateTag} ${status}`,
     detail,
-    `Độ lớn nến so với ATR: ${r.rangeATR}x`,
-    `range: 0.5 - 0.618 - H/L`,
-    `buy: <code>${r.lower0500}</code> - <code>${r.lower0618}</code> - <code>${r.low}</code>`,
-    `sell: <code>${r.upper0500}</code> - <code>${r.upper0618}</code> - <code>${r.high}</code>`,
+    `Độ lớn nến so với ATR: ${r.rangeATR2}x`,
+    `Close: <code>${r.close}</code>, High: <code>${r.high}</code>, Low: <code>${r.low}</code>`,
+    `buy: <code>${r.lower0382}</code> - <code>${r.lower0500}</code> - <code>${r.lower0618}</code> - <code>${r.lower0768}</code> - <code>${r.lower1000}</code> - <code>${r.lower2000}</code>`,
+    `sell: <code>${r.upper0382}</code> - <code>${r.upper0500}</code> - <code>${r.upper0618}</code> - <code>${r.upper0768}</code> - <code>${r.upper1000}</code> - <code>${r.upper2000}</code>`,
   ].join('\n');
 }
 

@@ -15,5 +15,6 @@ export function calcCandleMetrics(c, atrValue) {
     upperWick: round(upperWick),
     lowerWick: round(lowerWick),
     rangeATR: round(rangeATR),
+    rangeATR2: round(rangeATR, 2)
   };
 }
