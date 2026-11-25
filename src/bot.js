@@ -64,7 +64,7 @@ bot.on('message:text', async (ctx) => {
     console.log(`[BRIDGE] ${describe(cmd)} -> ${sent} EA`, JSON.stringify(lines));
 
     await ctx.reply(
-      sent > 0 ? `✅ ${esc(describe(cmd))} → ${sent} EA` : '⚠️ Không có EA nào đang kết nối, lệnh KHÔNG được gửi.',
+      sent > 0 ? `✅ ${esc(describe(cmd))} → ${sent} EA` : 'Không có EA nào đang kết nối.',
       {
         parse_mode: 'HTML',
         reply_parameters: { message_id: ctx.message.message_id },
