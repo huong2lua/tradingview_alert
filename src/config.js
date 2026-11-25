@@ -34,3 +34,6 @@ export const BRIDGE_HOST = '0.0.0.0';
 export const BRIDGE_PORT = 3002;
 export const TP_R = 2; // TP trên nút copy = entry ± TP_R × khoảng cách SL
 export const DEFAULT_RISK_USD = 25; // R ghi sẵn trên nút copy
+// ===== /liq: phiên New York (giờ America/New_York, tự theo DST) =====
+export const NY_SESSION_START = 8; // 08:00 NY
+export const NY_SESSION_END = 17; // 17:00 NY

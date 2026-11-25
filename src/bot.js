@@ -4,6 +4,7 @@ import { todayMessage, weekMessage, esc } from './calendar/format.js';
 import { TELEGRAM_OWNER_ID } from './config.js';
 import { parseCommand, toEaLines, describe, orderKeyboard } from './bridge/command.js';
 import { broadcast, listClients } from './bridge/tcp.js';
+import { getLiquidityLevels, formatLiqMessage } from './liquidity.js';
 
 const handler = (build) => async (ctx) => {
   try {
@@ -16,6 +17,16 @@ const handler = (build) => async (ctx) => {
 
 bot.command('today', handler(async () => todayMessage(await eventsToday())));
 bot.command('week', handler(async () => weekMessage(await eventsThisWeek())));
+
+// High/Low hôm qua, phiên NY hôm qua, tuần trước (bấm số để copy)
+bot.command('liq', async (ctx) => {
+  try {
+    await ctx.reply(formatLiqMessage(await getLiquidityLevels()), { parse_mode: 'HTML' });
+  } catch (err) {
+    console.error('Lệnh /liq lỗi:', err.message);
+    await ctx.reply('Chưa lấy được dữ liệu TradingView, thử lại sau nhé.').catch(() => {});
+  }
+});
 
 // ===== Bridge MT5: chỉ chủ bot, chỉ chat riêng =====
 const isOwner = (ctx) => ctx.chat?.type === 'private' && TELEGRAM_OWNER_ID && ctx.from?.id === TELEGRAM_OWNER_ID;
@@ -74,6 +85,7 @@ export function startBot() {
     .setMyCommands([
       { command: 'today', description: 'Tin USD high impact hôm nay' },
       { command: 'week', description: 'Tin USD high impact cả tuần' },
+      { command: 'liq', description: 'High/Low hôm qua, phiên NY, tuần trước' },
       { command: 'ea', description: 'EA MT5 đang kết nối' },
     ])
     .catch((err) => console.error('setMyCommands lỗi:', err.message));

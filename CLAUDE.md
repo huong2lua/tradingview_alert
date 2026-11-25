@@ -9,12 +9,15 @@ A long-running Node.js (ESM) process that does three things around Telegram:
 2. **USD high-impact economic calendar** (from the ForexFactory JSON feed): sends a daily digest at 07:00 Asia/Ho_Chi_Minh, a pre-alert 30 min before each event, and handles the bot commands `/today` and `/week`.
 3. **Telegram → MT5 bridge**: the owner pastes a trade command into a private chat with the bot, and the bot pushes it over TCP to every connected MT5 EA (`mt5/ea.mq5`).
 
+4. **`/liq`** (`src/liquidity.js`): replies with yesterday's high/low (the previous D1 candle), yesterday's NY session high/low (`NY_SESSION_START`–`NY_SESSION_END` America/New_York, taken from H1 candles inside that D1 candle) and last week's high/low (W1). It fetches on demand with `getCandles` and does not touch `runSession`. Numbers go in `<code>` so tapping copies them.
+
 Code comments, logs and user-facing messages are in Vietnamese. Keep them that way.
 
 ## Commands
 
 - `npm start`: runs `node src/index.js` (needs a `.env`, see `.env.example`).
 - `node test-bridge.mjs`: prints how `parseCommand` handles valid and invalid trade commands. It needs no `.env`.
+- `node test-liq.mjs`: prints the `/liq` message to the console (fetches from TradingView, sends nothing to Telegram).
 - `node test-calendar.mjs`: manual smoke test. It fetches the calendar (through the cache) and sends the `/week` message to `TELEGRAM_CHAT_ID`.
 - No build, lint or test framework is set up.
 
