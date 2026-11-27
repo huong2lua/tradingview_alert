@@ -60,7 +60,7 @@ export function formatMessage0(r, { mode = 'color' } = {}) {
 
 export async function sendTelegram(text, { chatId = TELEGRAM_CHAT_ID, replyMarkup, silent = false } = {}) {
   try {
-    await bot.api.sendMessage(chatId, text, {
+    return await bot.api.sendMessage(chatId, text, {
       parse_mode: 'HTML',
       reply_markup: replyMarkup,
       disable_notification: silent,
@@ -68,6 +68,17 @@ export async function sendTelegram(text, { chatId = TELEGRAM_CHAT_ID, replyMarku
   } catch (err) {
     // Không để lỗi Telegram làm sập phiên TradingView
     console.error('Gửi Telegram thất bại:', err.message);
+    return null;
+  }
+}
+
+// Forward 1 tin đã gửi sang kênh khác; lỗi chỉ log, không ném ra
+export async function forwardTelegram(fromChatId, messageId, toChatId) {
+  try {
+    return await bot.api.forwardMessage(toChatId, fromChatId, messageId);
+  } catch (err) {
+    console.error('Forward Telegram thất bại:', err.message);
+    return null;
   }
 }
 

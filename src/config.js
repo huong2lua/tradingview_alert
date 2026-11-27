@@ -15,6 +15,7 @@ export const CHANGE_MODE = 'color';
 export const SILENT_WHEN_UNCHANGED = true; // tin không đổi trạng thái gửi không chuông
 export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 export const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+export const FORWARD_CHAT_ID = process.env.FORWARD_CHAT_ID || null; // kênh B nhận bản forward tin đổi màu MACD, trống => tắt
 
 export const credentials = process.env.TV_SESSION && process.env.TV_SIGNATURE ? { session: process.env.TV_SESSION, signature: process.env.TV_SIGNATURE } : undefined;
 

@@ -26,6 +26,7 @@ Code comments, logs and user-facing messages are in Vietnamese. Keep them that w
 `.env` is loaded through `dotenv/config` in `src/config.js`:
 - `TELEGRAM_BOT_TOKEN` (required: `src/outputs/telegram.js` throws on import without it), `TELEGRAM_CHAT_ID` (signal channel).
 - `TV_SESSION` + `TV_SIGNATURE`: optional TradingView auth. Without both, the client connects anonymously.
+- `FORWARD_CHAT_ID`: optional. When the MACD state changes (`changed` in `session.js`), the signal message just sent to `TELEGRAM_CHAT_ID` is forwarded here via `forwardTelegram`. The bot must be able to post there.
 - `CAL_DIGEST_CHAT_ID`, `CAL_ALERT_CHAT_ID`: optional. Both default to `TELEGRAM_CHAT_ID`.
 - `SOCKET_TOKEN`: the shared secret EAs send in HELLO. Without it the bridge does not start.
 - `TELEGRAM_OWNER_ID`: the only Telegram user whose private messages are treated as trade commands.

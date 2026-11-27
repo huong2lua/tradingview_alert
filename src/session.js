@@ -6,13 +6,15 @@ import {
   MACD_SLOW,
   SEND_ONLY_ON_CHANGE,
   CHANGE_MODE,
+  TELEGRAM_CHAT_ID,
+  FORWARD_CHAT_ID,
   SILENT_WHEN_UNCHANGED,
   STALE_TIMEOUT_MS,
   WATCHDOG_TICK_MS,
   credentials,
 } from './config.js';
 import { analyzeClosedCandle } from './analyze.js';
-import { formatMessage0, sendTelegram, buildKeyboard } from './outputs/telegram.js';
+import { formatMessage0, sendTelegram, forwardTelegram, buildKeyboard } from './outputs/telegram.js';
 
 // Một phiên kết nối. Resolve khi kết nối đóng/lỗi
 export function runSession() {
@@ -83,6 +85,9 @@ export function runSession() {
         sendTelegram(text, {
           replyMarkup: buildKeyboard(result),
           silent: SILENT_WHEN_UNCHANGED && !changed, // chỉ có chuông khi đổi trạng thái
+        }).then((msg) => {
+          // Đổi màu => forward tin vừa gửi ở kênh A sang kênh B
+          if (changed && FORWARD_CHAT_ID && msg) forwardTelegram(TELEGRAM_CHAT_ID, msg.message_id, FORWARD_CHAT_ID);
         });
       }
     });
