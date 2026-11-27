@@ -26,8 +26,8 @@ function item(e, passed = false) {
 
 // Bản tin 7h sáng: 24 giờ tới
 export function digestMessage(list, from, to) {
-  const head = `📅 <b>Tin USD high impact</b> (${ddmm(from)} ${hhmm(from)} → ${ddmm(to)} ${hhmm(to)})`;
-  if (!list.length) return `${head}\n\n✅ Không có tin USD high impact nào.`;
+  const head = `📅 <b>Tin USD high impact</b>\n(${ddmm(from)} ${hhmm(from)} → ${ddmm(to)} ${hhmm(to)})`;
+  if (!list.length) return `${head}\n\n✅ Không có tin USD.`;
   return `${head}\n\n${list.map((e) => item(e)).join('\n\n')}`;
 }
 
@@ -42,7 +42,7 @@ export function preAlertMessage(list) {
 // /today
 export function todayMessage(list, now = new Date()) {
   const head = `📅 <b>Tin USD high impact hôm nay</b>\n(${weekday(now)} ${ddmm(now)})`;
-  if (!list.length) return `${head}\n\n✅ Hôm nay không có tin USD high impact.`;
+  if (!list.length) return `${head}\n\n✅ Hôm nay không có tin USD.`;
   const body = list.map((e) => item(e, Date.parse(e.time) <= now.getTime())).join('\n\n');
   return `${head}\n\n${body}`;
 }
@@ -50,7 +50,7 @@ export function todayMessage(list, now = new Date()) {
 // /week: gom theo ngày (giờ VN)
 export function weekMessage(list, now = new Date()) {
   const head = '🗓 <b>Tin USD high impact tuần này</b>';
-  if (!list.length) return `${head}\n\n✅ Tuần này không có tin USD high impact.`;
+  if (!list.length) return `${head}\n\n✅ Tuần này không có tin USD.`;
 
   const days = new Map();
   for (const e of list) {
